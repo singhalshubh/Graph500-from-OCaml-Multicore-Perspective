@@ -21,11 +21,11 @@ let rec changeVerticeInspected vertex (list:int list) (newList:int list) =
 ;;
 
 let rec dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited = 
-	if Array.length verticesInspected = 0 then distanceArray 
+	if Array.length verticesInspected = 0 then distanceArray, parentArray 
 	else
 		let minDist, minVerticeId = minimumDistance verticesInspected distanceArray in
 		let adjacentVerticeList = Hashtbl.find adjMatrix minVerticeId in
-		let distanceArray, parentArray = adjustDistance minVerticeId adjacentVerticeList distanceArray parentArray in
+		let distanceArray, parentArray = adjustDistance minVerticeId adjacentVerticeList distanceArray parentArray visited in
 		let verticesInspected = changeVerticeInspected minVerticeId (Array.to_list (verticesInspected)) [] in 
 		let _ = visited.(minVerticeId) <- 1 in dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited
 ;;
@@ -38,5 +38,5 @@ let main adjMatrix startVertex =
 	let _ = distanceArray.(startVertex) <- 0. in
 	let verticesInspected = Array.init size (fun(x)->x) in
 	let visited = Array.make size 0 in
-	let distanceArray = dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited in distanceArray
+	let distanceArray,parentArray = dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited in distanceArray, parentArray
 ;;
