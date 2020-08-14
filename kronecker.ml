@@ -1,19 +1,10 @@
-(*Kronecker is using the following algorithm : 
- Function Kronecker generator(scale, edgefactor) :
- 	N = 2^scale
- 	M = edgefactor * N (No of edges)
- 	[A,B,C] = [0.57, 0.19, 0.19]
- 	ijw = {	{1,1,1,1,1,...Mtimes};
- 			{1,1,1,1,1...Mtimes};
- 			{1,1,1,1,1...Mtimes};
- 			}
- 	ab = A + B;
-  	c_norm = C/(1 - (A + B));
-  	a_norm = A/(A + B);
-  	for i in (0, scale) :
-  		ii_bit = rand(1,M) > ab;
-  		jj_bit = rand (1, M) > ( c_norm * ii_bit + a_norm * not (ii_bit) );(not a is basically a xor 0)
-  		ijw(1:2,:) = ijw(1:2,:) + 2^(ib-1) * [ii_bit; jj_bit];
+(*Kronecker is using the following algorithm :  Function Kronecker
+generator(scale, edgefactor) : N = 2^scale M = edgefactor * N (No of edges)
+[A,B,C] = [0.57, 0.19, 0.19] ijw = {	{1,1,1,1,1,...Mtimes};
+{1,1,1,1,1...Mtimes}; {1,1,1,1,1...Mtimes}; } ab = A + B; c_norm = C/(1 - (A +
+B)); a_norm = A/(A + B); for i in (0, scale) : ii_bit = rand(1,M) > ab; jj_bit =
+rand (1, M) > ( c_norm * ii_bit + a_norm * not (ii_bit) );(not a is basically a
+xor 0) ijw(1:2,:) = ijw(1:2,:) + 2^(ib-1) * [ii_bit; jj_bit];
 
   	ijw(3,:) = unifrnd(0, 1, 1, M);//produce values from 0 to 1 for 1*M array.
   	
@@ -29,11 +20,11 @@
 Written by support of PRISM Lab, IIT Madras and OCaml Labs*)*)
 
 let rec listGenerator1D list m = 
-	if m = 0 then list else listGenerator1D (list@[1]) (m-1)
+	if m = 0 then list else listGenerator1D (1::list) (m-1)
 ;;
 
 let rec listGenerator m list =
-	if List.length list = 3 then list else listGenerator m (list@[listGenerator1D [] m])
+	if List.length list = 3 then list else listGenerator m ((listGenerator1D [] m)::list)
 ;;
 
 let rec modifyIJW ijwRow scale index bit =
@@ -47,7 +38,7 @@ end
 ;;
 
 let rec randomWghtGen len list =
-	if len = 0 then list else randomWghtGen (len-1) (list@[Random.float 1.])
+	if len = 0 then list else randomWghtGen (len-1) ((Random.float 1.)::list)
 ;;
 
 let rec compareWithPr index m n ab a_norm c_norm ijw scale = 
@@ -59,31 +50,31 @@ let rec compareWithPr index m n ab a_norm c_norm ijw scale =
 	in ([List.map float_of_int (firstRowIJW)] @ [List.map float_of_int (secondRowIJW)] @[thirdRow])
 ;; 
 
-let rec randomNumberList list index n = 
-	if index = 0 then list else randomNumberList (list@[Random.int n]) (index-1) n
-;;
+	let rec randomNumberList list index n = 
+		if index = 0 then list else randomNumberList (Random.int n::list) (index-1) n
+	;;
 
-let rec floatToInt list index newList = 
-	if index = 2 then newList else floatToInt list (index+1) (newList@ [List.map int_of_float (List.nth list index)]) 
-;;
+	let rec floatToInt list index newList = 
+		if index = 2 then newList else floatToInt list (index+1) (newList@ [List.map int_of_float (List.nth list index)]) 
+	;;
 
-let rec intToFloat list index newList = 
-	if index = 2 then newList else intToFloat list (index+1) (newList@ [List.map float_of_int (List.nth list index)]) 
-;;
+	let rec intToFloat list index newList = 
+		if index = 2 then newList else intToFloat list (index+1) (newList@ [List.map float_of_int (List.nth list index)]) 
+	;;
 
-let rec permuteVertice list randomList newList row m =
-	if row = 2 then newList else
-	let rec produceNewRow m newList1 row column = 
-		if column = m then newList1 else produceNewRow m (newList1@[ List.nth randomList (List.nth (List.nth list row) column)] ) row (column+1) 
-	in permuteVertice list randomList (newList@[produceNewRow m [] row 0] ) (row+1) m
-;;
+	let rec permuteVertice list randomList newList row m =
+		if row = 2 then newList else
+		let rec produceNewRow m newList1 row column = 
+			if column = m then newList1 else produceNewRow m (newList1@[ List.nth randomList (List.nth (List.nth list row) column)] ) row (column+1) 
+		in permuteVertice list randomList (newList@[produceNewRow m [] row 0] ) (row+1) m
+	;;
 
-let rec permuteEdgeList list randomList newList m index= 
-	if index = m then newList 
-else begin 
-	let v = List.nth randomList index in let l = newList@[[ (List.nth (List.nth list 0) v ) ; (List.nth (List.nth list 1) v ) ; (List.nth (List.nth list 2) v ) ]] in permuteEdgeList list randomList l m (index+1)
-end
-;; 
+	let rec permuteEdgeList list randomList newList m index= 
+		if index = m then newList 
+	else begin 
+		let v = List.nth randomList index in let l = newList@[[ (List.nth (List.nth list 0) v ) ; (List.nth (List.nth list 1) v ) ; (List.nth (List.nth list 2) v ) ]] in permuteEdgeList list randomList l m (index+1)
+	end
+	;; 
 
 let rec transpose list col newList = 
 	if col = 3 then newList else 
@@ -98,7 +89,6 @@ let rec printList list =
 	[] -> Printf.printf "END" | 
 	head::tail -> List.iter print_float head; printList tail
 ;;
-
 
 let kronecker scale edgefactor = 
 	let n = int_of_float(2.**float_of_int (scale)) in

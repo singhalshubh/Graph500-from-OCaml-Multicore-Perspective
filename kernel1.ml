@@ -34,15 +34,12 @@ let rec removeSelfLoops ijw newList col m =
 (*This is basically the construction of adj matrix [row][col], just in case dense graphs are being tested. All the kernels further though use HashMap, and thus would 
 require changes*)
 
-(*let constructionAdjMatrix list maxLabel =
-	 let matrix = Array.make_matrix maxLabel maxLabel 0. in
-	 let rec fillMatrix matrix list =
-	 	match list with
-	 	[] -> matrix |
-	 	head::tail -> let _ = matrix.(int_of_float(List.nth head 0)).(int_of_float(List.nth head 1)) <- (List.nth head 2) in  
-	 				let _ = matrix.(int_of_float(List.nth head 1)).(int_of_float(List.nth head 0)) <- (List.nth head 2) in fillMatrix matrix tail
-	in fillMatrix matrix list
-;;*)
+(*let constructionAdjMatrix list maxLabel = let matrix = Array.make_matrix
+maxLabel maxLabel 0. in let rec fillMatrix matrix list = match list with [] ->
+matrix | head::tail -> let _ = matrix.(int_of_float(List.nth head
+0)).(int_of_float(List.nth head 1)) <- (List.nth head 2) in   let _ =
+matrix.(int_of_float(List.nth head 1)).(int_of_float(List.nth head 0)) <-
+(List.nth head 2) in fillMatrix matrix tail in fillMatrix matrix list ;;*)
 
 (*Adding Edge adds the edge to HashMap for undirected graphs, where the binding is between index and the list (endVertex, weight) *)
 

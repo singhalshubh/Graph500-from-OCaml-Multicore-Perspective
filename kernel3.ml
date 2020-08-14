@@ -1,6 +1,7 @@
-(*Kernel 3 works on the dijkstars algorithm which is basically the shortest path from the node to all the nodes. As expected the main function here takes the HashMap and 
-the source node from where the shortest distnaces have to be calculated.*)
-(*INPUTS : Adjacency HashMap and Start Vertex*)
+(*Kernel 3 works on the dijkstars algorithm which is basically the shortest path
+from the node to all the nodes. As expected the main function here takes the
+HashMap and  the source node from where the shortest distnaces have to be
+calculated.*) (*INPUTS : Adjacency HashMap and Start Vertex*)
 
 (*<-------OCaml Kernel 3 inspired from https://graph500.org/?page_id=12---------->
 Written by support of PRISM Lab, IIT Madras and OCaml Labs*)
