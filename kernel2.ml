@@ -1,6 +1,7 @@
-(*Kernel 2 aims at building a bfs tree where the bfs is maintained using a queue and the parent Array which consists of the immediate parent of the node. 
-The input for this kernel is : 
-INPUTS : adjacency HashMap(for undirected graphs) and starting vertex which would allow you to begin the bfs*)
+(*Kernel 2 aims at building a bfs tree where the bfs is maintained using a queue
+and the parent Array which consists of the immediate parent of the node.  The
+input for this kernel is :  INPUTS : adjacency HashMap(for undirected graphs)
+and starting vertex which would allow you to begin the bfs*)
 
 (*<-------OCaml Kernel 2 inspired from https://graph500.org/?page_id=12---------->
 Written by support of PRISM Lab, IIT Madras and OCaml Labs*)
