@@ -26,7 +26,7 @@ let rec adjustDistance vertex adjacentList distanceArray parentArray visited =
 	[] -> distanceArray, parentArray |
 	head::tail -> if visited.(fst(head)) = 1 then adjustDistance vertex tail distanceArray parentArray visited else
 					let adjvertex = fst(head) in if distanceArray.(adjvertex) < (distanceArray.(vertex) +. snd(head) ) then adjustDistance vertex tail distanceArray parentArray visited
-					else let _ = parentArray.(adjvertex) <- vertex in let _ = distanceArray.(adjvertex) <- (distanceArray.(vertex) +. snd(head)) in adjustDistance vertex tail distanceArray parentArray visited
+					else parentArray.(adjvertex) <- vertex; distanceArray.(adjvertex) <- (distanceArray.(vertex) +. snd(head)); adjustDistance vertex tail distanceArray parentArray visited
 ;;  
 
 (*This basically removes the nodes visited from the list verticesInspected*)
