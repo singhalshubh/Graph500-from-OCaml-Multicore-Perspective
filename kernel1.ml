@@ -45,8 +45,8 @@ matrix.(int_of_float(List.nth head 1)).(int_of_float(List.nth head 0)) <-
 
 let addEdge startVertex endVertex weight hashTable =
 	if Hashtbl.mem hashTable startVertex = false
-	then let _= Hashtbl.add hashTable startVertex [(endVertex,weight)] in hashTable
-	else let _ = Hashtbl.replace hashTable startVertex ( (Hashtbl.find hashTable startVertex) @ [(endVertex,weight)]) in hashTable
+	then Hashtbl.add hashTable startVertex [(endVertex,weight)]
+	else Hashtbl.replace hashTable startVertex ( (Hashtbl.find hashTable startVertex) @ [(endVertex,weight)])
 ;;
 
 (*The two functions constructionAdjHash and kernel1 are the main functions driving all the other functions.*)
@@ -54,7 +54,7 @@ let rec constructionAdjHash list hashTable =
 	match list with 
 	[] -> hashTable |
 	head::tail -> let startVertex = int_of_float(List.nth head 0) and endVertex = int_of_float(List.nth head 1) and weight = List.nth head 2 in
-					let h = addEdge startVertex endVertex weight hashTable in let hashTable = addEdge endVertex startVertex weight h in constructionAdjHash tail hashTable 
+					addEdge startVertex endVertex weight hashTable; addEdge endVertex startVertex weight hashTable; constructionAdjHash tail hashTable; 
 ;;
 
 let rec kernel1 ijw m = 
