@@ -53,8 +53,8 @@ let main adjMatrix startVertex =
 	let size = Hashtbl.length adjMatrix in
 	let parentArray = Array.make size 0 in
 	let distanceArray = Array.make size infinity in
-	let _ = parentArray.(startVertex) <- startVertex in
-	let _ = distanceArray.(startVertex) <- 0. in
+	parentArray.(startVertex) <- startVertex;
+	distanceArray.(startVertex) <- 0.;
 	let verticesInspected = Array.init size (fun(x)->x) in
 	let visited = Array.make size 0 in
 	let distanceArray,parentArray = dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited in distanceArray, parentArray
