@@ -16,10 +16,10 @@ let rec transpose list col newList =
 let rec sortVerticeList list newList =
 	let rec sortVerticeList list newList maximum = 
 		match list with
-		[] -> (newList,maximum) |
+		[] -> (newList,int_of_float(maximum)) |
 		head::tail -> let x = List.nth head 0 and y = List.nth head 1 in if x > y then sortVerticeList tail (newList@[[x;y;List.nth head 2]]) (max maximum x)     
 		else sortVerticeList tail (newList@[[y;x;List.nth head 2]]) (max maximum y)
-	in sortVerticeList list newList 0
+	in sortVerticeList list newList 0.
 ;;
 
 (*As the name suggests, it removes the self loops from ijw*)
@@ -57,9 +57,15 @@ let rec constructionAdjHash list hashTable =
 					addEdge startVertex endVertex weight hashTable; addEdge endVertex startVertex weight hashTable; constructionAdjHash tail hashTable; 
 ;;
 
-let rec kernel1 ijw m = 
+let kernel1 ijw m = 
 	let list = removeSelfLoops ijw [] 0 m in
 	let list,maximumEdgeLabel = sortVerticeList list [] in
-	let hashTable = Hashtbl.create size in
+	let hashTable = Hashtbl.create maximumEdgeLabel in
 	let adjMatrix = constructionAdjHash list hashTable in adjMatrix
+;;
+
+let linkKronecker () = 
+	let scale = int_of_string(Sys.argv.(1)) in
+	let edgefactor = int_of_string(Sys.argv.(2)) in
+	let adjMatrix = kernel1 (Kronecker.kronecker scale edgefactor) (snd(Kronecker.computeNumber scale edgefactor)) in adjMatrix 
 ;;
