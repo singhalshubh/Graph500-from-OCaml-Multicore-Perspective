@@ -48,16 +48,27 @@ let rec dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected 
 		let _ = visited.(minVerticeId) <- 1 in dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited
 ;;
 
+let rec hashMapVerticeList adjMatrix list n index =
+	if index = n then (Array.of_list (List.rev list)) else if Hashtbl.mem adjMatrix index = true then hashMapVerticeList adjMatrix (index::list) n (index+1) else hashMapVerticeList adjMatrix list n (index+1)
+
+
 (*ALl intialisation done in main function. Weights are float and vertices are int*)
-let main adjMatrix startVertex = 
-	let size = Hashtbl.length adjMatrix in
+let main adjMatrix startVertex n = 
+	let size = n in
 	let parentArray = Array.make size 0 in
 	let distanceArray = Array.make size infinity in
 	parentArray.(startVertex) <- startVertex;
 	distanceArray.(startVertex) <- 0.;
-	let verticesInspected = Array.init size (fun(x)->x) in
+	let verticesInspected = hashMapVerticeList adjMatrix [] n 0 in
 	let visited = Array.make size 0 in
-	let distanceArray,parentArray = dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited in distanceArray, parentArray
+	let distanceArray,parentArray = dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited in 
+	Array.iter (fun x -> Printf.printf "%f, " x) distanceArray;
+	Array.iter (fun x -> Printf.printf "%d, " x) parentArray;
+	distanceArray, parentArray
 ;;
 
-main (Kernel1.linkKronecker ()) (int_of_string(Sys.argv.(3)));;
+let linkKernel1 () = 
+	let ans = Kernel1.linkKronecker () in
+	main (fst(ans)) (int_of_string(Sys.argv.(3))) (snd(ans));;
+
+linkKernel1 ();;

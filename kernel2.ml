@@ -45,8 +45,8 @@ let rec bfs adjMatrix queue bfsTree parentArray visited =
 
 (*Main function is the function where it calls bfs. Size computation is using HashMap and the initialiszation of all arrays and lists happen here.*)
 
-let main adjMatrixHash startVertex =
-	let len = (Hashtbl.length adjMatrixHash) in
+let main adjMatrixHash startVertex n =
+	let len = n in
 	Printf.printf "%d\n" len;
 	let adjMatrix = adjMatrixHash in
 	let parentArray = Array.make len (-1) in
@@ -57,4 +57,8 @@ let main adjMatrixHash startVertex =
 	(bfsTree,parentArray)
 ;;
 
-main (Kernel1.linkKronecker ()) (int_of_string(Sys.argv.(3)));;
+let linkKernel1 () = 
+	let ans = Kernel1.linkKronecker () in
+	main (fst(ans)) (int_of_string(Sys.argv.(3))) (snd(ans));;
+
+linkKernel1 ();;

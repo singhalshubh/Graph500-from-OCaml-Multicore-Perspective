@@ -60,8 +60,8 @@ let rec constructionAdjHash list hashTable =
 let kernel1 ijw m = 
 	let list = removeSelfLoops ijw [] 0 m in
 	let list,maximumEdgeLabel = sortVerticeList list [] in
-	let hashTable = Hashtbl.create maximumEdgeLabel in
-	let adjMatrix = constructionAdjHash list hashTable in adjMatrix
+	let hashTable = Hashtbl.create (maximumEdgeLabel+1) in
+	let adjMatrix = constructionAdjHash list hashTable in (adjMatrix, maximumEdgeLabel+1)
 ;;
 
 let linkKronecker () = 
