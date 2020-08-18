@@ -71,9 +71,13 @@ let rec printList list =
 	head::tail -> List.iter print_float head; printList tail
 ;;
 
-let kronecker scale edgefactor = 
+let computeNumber scale edgefactor = 
 	let n = int_of_float(2.**float_of_int (scale)) in
-	let m = edgefactor * n in 
+	let m = edgefactor * n in n,m
+;; 
+
+let kronecker scale edgefactor = 
+	let n,m = computeNumber scale edgefactor in 
 	let a,b,c = 0.57, 0.19, 0.19 in 
 	let ijw = listGenerator m [] in
 	(*For debugging*)

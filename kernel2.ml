@@ -47,8 +47,14 @@ let rec bfs adjMatrix queue bfsTree parentArray visited =
 
 let main adjMatrixHash startVertex =
 	let len = (Hashtbl.length adjMatrixHash) in
+	Printf.printf "%d\n" len;
 	let adjMatrix = adjMatrixHash in
 	let parentArray = Array.make len (-1) in
 	let visited = Array.make len 0 in
-	let bfsTree,parentArray = bfs adjMatrixHash [startVertex] [] parentArray visited in (bfsTree, parentArray)
+	let bfsTree,parentArray = bfs adjMatrixHash [startVertex] [] parentArray visited in 
+	List.iter (fun x -> Printf.printf "%d, " x) bfsTree;
+	Array.iter (fun x -> Printf.printf "%d, " x) parentArray;
+	(bfsTree,parentArray)
 ;;
+
+main (Kernel1.linkKronecker ()) (int_of_string(Sys.argv.(3)));;

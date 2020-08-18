@@ -59,3 +59,5 @@ let main adjMatrix startVertex =
 	let visited = Array.make size 0 in
 	let distanceArray,parentArray = dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited in distanceArray, parentArray
 ;;
+
+main (Kernel1.linkKronecker ()) (int_of_string(Sys.argv.(3)));;
