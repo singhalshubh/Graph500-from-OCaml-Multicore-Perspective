@@ -56,13 +56,16 @@ else
 
 let main adjMatrixHash n =
 	let len = n in
-	Printf.printf "%d\n" len;
+	(*Printf.printf "%d\n" len;*)
 	let adjMatrix = adjMatrixHash in
 	let parentArray = Array.make len (-1) in
 	let visited = Array.make len 0 in
 	let bfsTree,parentArray = bfsRecDisconnectedGraph adjMatrixHash [] parentArray visited 0 in 
-	List.iter (fun x -> Printf.printf "%d, " x) bfsTree;
-	Array.iter (fun x -> Printf.printf "%d, " x) parentArray;
+	Printf.printf "\nBfs Tree is : ";
+	List.iter (fun x -> Printf.printf "%d " x) bfsTree;
+	Printf.printf "\n Parent Array is : ";
+	Array.iter (fun x -> Printf.printf "%d " x) parentArray;
+	Printf.printf "\n KERNEL2 OVER";
 	(bfsTree,parentArray)
 ;;
 

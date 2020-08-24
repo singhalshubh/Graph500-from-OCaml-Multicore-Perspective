@@ -13,7 +13,7 @@ E.g. N1 is under study and now the nodes N2, N3 are at 2, inf distance in distan
 let minimumDistance verticesInspected distanceArray = 
 	let rec minimumDistance verticesInspected distanceArray minimumVal index minimumVertice =
 		if index = Array.length verticesInspected then minimumVal, minimumVertice else
-		if minimumVal > distanceArray.(verticesInspected.(index)) then minimumDistance verticesInspected distanceArray (distanceArray.(verticesInspected.(index))) (index+1) (verticesInspected.(index))
+		if minimumVal >= distanceArray.(verticesInspected.(index)) then minimumDistance verticesInspected distanceArray (distanceArray.(verticesInspected.(index))) (index+1) (verticesInspected.(index))
 	else minimumDistance verticesInspected distanceArray minimumVal (index+1) (minimumVertice)
 in minimumDistance verticesInspected distanceArray infinity 0 0
 ;;
@@ -50,7 +50,7 @@ let rec dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected 
 
 let rec hashMapVerticeList adjMatrix list n index =
 	if index = n then (Array.of_list (List.rev list)) else if Hashtbl.mem adjMatrix index = true then hashMapVerticeList adjMatrix (index::list) n (index+1) else hashMapVerticeList adjMatrix list n (index+1)
-
+;;
 
 (*ALl intialisation done in main function. Weights are float and vertices are int*)
 let main adjMatrix startVertex n = 
@@ -62,8 +62,11 @@ let main adjMatrix startVertex n =
 	let verticesInspected = hashMapVerticeList adjMatrix [] n 0 in
 	let visited = Array.make size 0 in
 	let distanceArray,parentArray = dijkstraAlgorithm adjMatrix parentArray distanceArray verticesInspected visited in 
+	Printf.printf "\nDistance Array is : ";
 	Array.iter (fun x -> Printf.printf "%f, " x) distanceArray;
+	Printf.printf "\n Parent Array is : ";
 	Array.iter (fun x -> Printf.printf "%d, " x) parentArray;
+	Printf.printf "\n KERNEL3 OVER";
 	distanceArray, parentArray
 ;;
 

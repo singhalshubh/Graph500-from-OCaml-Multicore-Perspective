@@ -9,6 +9,6 @@ shortestPath="kernel3"$module
 code="c"
 
 ocamlopt -o $code $kronecker $hashmapKernel $bfs
-./$code $1 $2 $3
+./$code $1 $2
 ocamlopt -o $code $kronecker $hashmapKernel $shortestPath
 ./$code $1 $2 $3
