@@ -57,11 +57,18 @@ let rec constructionAdjHash list hashTable =
 					addEdge startVertex endVertex weight hashTable; addEdge endVertex startVertex weight hashTable; constructionAdjHash tail hashTable; 
 ;;
 
+let rec adjustForAllVertices adjMatrix size index =
+	if index = size then adjMatrix else
+	if Hashtbl.mem adjMatrix index = true then adjustForAllVertices adjMatrix size (index+1) else
+	let _  = Hashtbl.add adjMatrix index ([]) in adjustForAllVertices adjMatrix size (index+1)
+;;
+
 let kernel1 ijw m = 
 	let list = removeSelfLoops ijw [] 0 m in
 	let list,maximumEdgeLabel = sortVerticeList list [] in
 	let hashTable = Hashtbl.create (maximumEdgeLabel+1) in
-	let adjMatrix = constructionAdjHash list hashTable in (adjMatrix, maximumEdgeLabel+1)
+	let adjMatrix = constructionAdjHash list hashTable in 
+	let adjMatrix = adjustForAllVertices adjMatrix (maximumEdgeLabel+1) 0 in (adjMatrix, maximumEdgeLabel+1) 
 ;;
 
 let linkKronecker () = 

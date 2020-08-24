@@ -36,7 +36,7 @@ let rec bfs adjMatrix queue bfsTree parentArray visited =
 	[] -> bfsTree,parentArray |
 	head::tail -> if visited.(head) = 0 then
 					let _ = visited.(head) <- 1 in
-					let adjacentVertices = Hashtbl.find adjMatrix head in 
+					let adjacentVertices = Hashtbl.find adjMatrix head in  
 					let queue, parentArray = appendVerticesToQueue head tail adjacentVertices parentArray visited in
 					(*let _ = printList queue in*)(*For debugging*)
 					let _ = Hashtbl.remove adjMatrix head in bfs adjMatrix queue (bfsTree@[head]) parentArray visited
@@ -45,13 +45,22 @@ let rec bfs adjMatrix queue bfsTree parentArray visited =
 
 (*Main function is the function where it calls bfs. Size computation is using HashMap and the initialiszation of all arrays and lists happen here.*)
 
-let main adjMatrixHash startVertex n =
+let rec bfsRecDisconnectedGraph adjMatrix bfsTree parentArray visited index = 
+	if index = Array.length visited then bfsTree, parentArray 
+else
+	if parentArray.(index) = -1 && visited.(index) = 0 
+		then let bfsTree, parentArray = bfs adjMatrix [index] bfsTree parentArray visited in 
+				bfsRecDisconnectedGraph adjMatrix bfsTree parentArray visited (index+1)
+	else bfsRecDisconnectedGraph adjMatrix bfsTree parentArray visited (index+1)
+;;
+
+let main adjMatrixHash n =
 	let len = n in
 	Printf.printf "%d\n" len;
 	let adjMatrix = adjMatrixHash in
 	let parentArray = Array.make len (-1) in
 	let visited = Array.make len 0 in
-	let bfsTree,parentArray = bfs adjMatrixHash [startVertex] [] parentArray visited in 
+	let bfsTree,parentArray = bfsRecDisconnectedGraph adjMatrixHash [] parentArray visited 0 in 
 	List.iter (fun x -> Printf.printf "%d, " x) bfsTree;
 	Array.iter (fun x -> Printf.printf "%d, " x) parentArray;
 	(bfsTree,parentArray)
@@ -59,6 +68,6 @@ let main adjMatrixHash startVertex n =
 
 let linkKernel1 () = 
 	let ans = Kernel1.linkKronecker () in
-	main (fst(ans)) (int_of_string(Sys.argv.(3))) (snd(ans));;
+	main (fst(ans)) (snd(ans));;
 
 linkKernel1 ();;
