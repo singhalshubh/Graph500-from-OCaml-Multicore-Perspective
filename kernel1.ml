@@ -13,7 +13,7 @@ let rec transpose list col newList =
 ;;
 
 (*This basically sorts the list in a way that (startVertex, endVertex), startVertex > endVertex.*)
-let rec sortVerticeList list newList =
+let sortVerticeList list newList =
 	let rec sortVerticeList list newList maximum = 
 		match list with
 		[] -> (newList,int_of_float(maximum)) |
