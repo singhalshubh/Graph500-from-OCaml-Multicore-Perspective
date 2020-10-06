@@ -1,0 +1,4 @@
+(executable
+ (name kronecker)
+ (modules kronecker)
+ (modes native byte))
