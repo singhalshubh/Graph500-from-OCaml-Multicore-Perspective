@@ -38,6 +38,14 @@ let map f l =
   in
   map_aux (fun ys -> ys) l
 
+let zip_with f xs ys =
+  let rec aux acc xs ys =
+    match xs, ys with
+    | [], _ -> List.rev acc
+    | _, [] -> acc
+    | x::xss, y::yss -> aux ((f x y)::acc) xss yss  
+  in aux [] xs ys
+
 let listGenerator m =
   List.init 3 (fun _ -> List.init m (fun _ -> 0.))
 
@@ -64,7 +72,7 @@ let generateJJBitList ii_bit m a_norm c_norm =
   else 0.
   in
   map (cmp m) ii_bit 
-
+(* 
 let rec modifyRowIJW kk_list index list newList =
   match (kk_list, list) with
   | [], [] -> List.rev newList
@@ -72,15 +80,18 @@ let rec modifyRowIJW kk_list index list newList =
   | [], _ -> []
   | headII :: tailII, headList :: tailList ->
       let element = headList +. ((2. ** float_of_int index) *. headII) in
-      modifyRowIJW tailII index tailList (element :: newList)
+      modifyRowIJW tailII index tailList (element :: newList) *)
+
+let modifyRowIJW kk_list list index = 
+  zip_with (fun x y -> y +. ((2.** float_of_int index) *. x)) kk_list list
 
 let rec compareWithPr index m n ab a_norm c_norm ijw scale =
   if index = scale then ijw
   else
     let ii_bit = generateIIBitList m ab in
     let jj_bit = generateJJBitList ii_bit m a_norm c_norm in
-    let firstRowIJW = modifyRowIJW ii_bit index (List.nth ijw 0) [] in
-    let secondRowIJW = modifyRowIJW jj_bit index (List.nth ijw 1) [] in
+    let firstRowIJW = modifyRowIJW ii_bit (List.nth ijw 0) index in
+    let secondRowIJW = modifyRowIJW jj_bit (List.nth ijw 1) index in
     let ijw = [ firstRowIJW ] @ [ secondRowIJW ] @ [ List.nth ijw 2 ] in
     compareWithPr (index + 1) m n ab a_norm c_norm ijw scale
 
