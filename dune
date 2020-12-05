@@ -1,0 +1,5 @@
+(executable
+	(name kernel1_par)
+	(libraries domainslib))
+
+(alias (name buildbench) (deps kernel1_par.exe))
