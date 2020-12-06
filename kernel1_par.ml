@@ -9,7 +9,7 @@ let scale = try int_of_string Sys.argv.(1) with _ -> 12
 
 let edgefactor = try int_of_string Sys.argv.(2) with _ -> 10
 
-let num_domains = try int_of_string Sys.argv.(1) with _ -> 1
+let num_domains = try int_of_string Sys.argv.(3) with _ -> 1
 
 module T = Domainslib.Task
 
@@ -50,20 +50,20 @@ matrix.(int_of_float(List.nth head 1)).(int_of_float(List.nth head 0)) <-
 (*Adding Edge adds the edge to HashMap for undirected graphs, where the binding 
 is between index and the list (endVertex, weight) *)
 
-let addEdgeWithoutKey startVertex endVertex weight hashTable =
+let addEdge startVertex endVertex weight hashTable =
   Hashtbl.add hashTable startVertex (endVertex, weight)  
 
 (*The two functions constructionAdjHash and kernel1 are the main 
 functions driving all the other functions.*)
-let rec constructionAdjHash ar hashTable index l =
-  if index = l then ()
+let rec constructionAdjHash ar hashTable i lower index =
+  if index = lower-1 then ()
   else
     let startVertex = int_of_float ar.(index).(0)
     and endVertex = int_of_float ar.(index).(1)
     and weight = ar.(index).(2) in
-    addEdgeWithoutKey startVertex endVertex weight hashTable;
-    addEdgeWithoutKey endVertex startVertex weight hashTable;
-    constructionAdjHash ar hashTable (index + 1) l
+    addEdge startVertex endVertex weight hashTable;
+    addEdge endVertex startVertex weight hashTable;
+    constructionAdjHash ar hashTable i lower (index - 1)
 
 let rec adjustForAllVertices adjMatrix size index hashTable =
   if index = size then hashTable
@@ -96,13 +96,33 @@ let computeNumber scale edgefactor =
   let m = edgefactor * n in
   (n, m)
 
-let kernel1 ijw m pool =
+let kernel1 ijw m =
+  let start = Sys.time () in 
   let ar, maximumEdgeLabel = sortVerticeList ijw [||] (m - 1) in
+  let stop = Sys.time () in
+  let _  =Printf.printf "Sort Exec : %f\n" (stop -. start) in
+  (*let _ = Printf.printf "Length : %d, One\n" (Array.length ar) in*)
+  
+
+  let start = Sys.time () in
   let hashTable = Hashtbl.create (maximumEdgeLabel + 1) in
   let temp = (Array.length ar)/num_domains in
+  (*let _ = Printf.printf "Length num_of : %d\n" (num_domains) in*)
+  
+  let pool = T.setup_pool ~num_domains:(num_domains - 1) in
   T.parallel_for pool ~start:0 ~finish:(num_domains-1)
-    ~body:(fun i -> constructionAdjHash ar hashTable (i*temp) (i*temp + temp));
+    ~body:(fun i -> if i=(num_domains-1) then 
+      constructionAdjHash ar hashTable i (i*temp) (Array.length ar-1)
+    else constructionAdjHash ar hashTable i (i*temp) (i*temp + temp-1));
+  (*let _ = Printf.printf "Two\n" in*)
+  let _ = T.teardown_pool pool in 
+  
+  let stop = Sys.time () in
+  let _  =Printf.printf "Exec : %f" (stop -. start) in
+  
+
   let hashTable1 = Hashtbl.create (maximumEdgeLabel + 1) in
+  (*let _ = Printf.printf "Three\n" in*)
   let adjMatrix = adjustForAllVertices hashTable (maximumEdgeLabel + 1) 0 hashTable1 in
   let _ = Printf.printf "%d" maximumEdgeLabel in
   (adjMatrix, maximumEdgeLabel + 1)
@@ -110,12 +130,10 @@ let kernel1 ijw m pool =
 let linkKronecker () =
   let file = open_in "/home/shubh/graph500par/kronecker.txt" in
   let ijw = readFile file [||] in
-  let pool = T.setup_pool ~num_domains:(num_domains - 1) in
   let (adjMatrix,number) =
-    kernel1 ijw (snd (computeNumber scale edgefactor)) pool
+    kernel1 ijw (snd (computeNumber scale edgefactor))
   in
-  let _ = T.teardown_pool pool in 
-  let _  =Printf.printf "\nLen : %d\n" (List.length (Hashtbl.find adjMatrix 4)) in
+  (*let _  =Printf.printf "\nLen : %d\n" (List.length (Hashtbl.find adjMatrix 4)) in
   let x = List.nth (Hashtbl.find adjMatrix 4) 0 in
 
   let _ = Printf.printf "First : %d\n" (fst x) in
@@ -123,6 +141,7 @@ let linkKronecker () =
   let x = List.nth (Hashtbl.find adjMatrix 4) 1 in
   let _ = Printf.printf "Second : %d\n" (fst x) in
   let _ = Printf.printf "Second : %f\n" (snd x) in
+  *)
   adjMatrix,number
 ;;
 
