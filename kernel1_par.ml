@@ -51,7 +51,9 @@ matrix.(int_of_float(List.nth head 1)).(int_of_float(List.nth head 0)) <-
 is between index and the list (endVertex, weight) *)
 
 let addEdge startVertex endVertex weight hashTable =
-  Hashtbl.add hashTable startVertex (endVertex, weight)  
+    match Lockfree.Hash.find hashTable startVertex with 
+    None ->  Lockfree.Hash.add hashTable startVertex [(endVertex, weight)] |
+    Some l -> Lockfree.Hash.add hashTable startVertex ((endVertex, weight) :: l)
 
 (*The two functions constructionAdjHash and kernel1 are the main 
 functions driving all the other functions.*)
@@ -65,14 +67,23 @@ let rec constructionAdjHash ar hashTable i lower index =
     addEdge endVertex startVertex weight hashTable;
     constructionAdjHash ar hashTable i lower (index - 1)
 
-let rec adjustForAllVertices adjMatrix size index hashTable =
-  if index = size then hashTable
-  else if Hashtbl.mem adjMatrix index = true then
-    let _ = Hashtbl.add hashTable index (Hashtbl.find_all adjMatrix index) in 
-    adjustForAllVertices adjMatrix size (index + 1) hashTable
+(*let rec find_all adjMatrix index hashTable = 
+  if Lockfree.Hash.mem adjMatrix index = false then Lockfree.Hash.find hashTable index
+else if Lockfree.Hash.mem hashTable index = true then begin
+Lockfree.Hash.add hashTable index (Lockfree.Hash.find hashTable index @[ [(Lockfree.Hash.find adjMatrix index)]]);
+if Lockfree.Hash.remove adjMatrix index = true then find_all adjMatrix index hashTable 
+else exit 0; end
+else begin Lockfree.Hash.add hashTable index ([ [(Lockfree.Hash.find adjMatrix index)]]);
+if Lockfree.Hash.remove adjMatrix index = true then find_all adjMatrix index hashTable
+else exit 0; end*) 
+
+let rec adjustForAllVertices adjMatrix size index =
+  if index = size then ()
+  else if Lockfree.Hash.mem adjMatrix index = true then
+    adjustForAllVertices adjMatrix size (index + 1)
   else
-    let _ = Hashtbl.add hashTable index [] in
-    adjustForAllVertices adjMatrix size (index + 1) hashTable
+    let _ = Lockfree.Hash.add adjMatrix index [] in
+    adjustForAllVertices adjMatrix size (index + 1)
 
 let rec readFile file ijw =
   try
@@ -97,16 +108,15 @@ let computeNumber scale edgefactor =
   (n, m)
 
 let kernel1 ijw m =
-  let start = Sys.time () in 
+  (*let start = Sys.time () in*) 
   let ar, maximumEdgeLabel = sortVerticeList ijw [||] (m - 1) in
-  let stop = Sys.time () in
+  (*let stop = Sys.time () in
   let _  =Printf.printf "Sort Exec : %f\n" (stop -. start) in
-  (*let _ = Printf.printf "Length : %d, One\n" (Array.length ar) in*)
+  let _ = Printf.printf "Length : %d, One\n" (Array.length ar) in*)
   
-
-  let start = Sys.time () in
-  let hashTable = Hashtbl.create (maximumEdgeLabel + 1) in
+  let hashTable = Lockfree.Hash.create () in
   let temp = (Array.length ar)/num_domains in
+  let start = Sys.time () in
   (*let _ = Printf.printf "Length num_of : %d\n" (num_domains) in*)
   
   let pool = T.setup_pool ~num_domains:(num_domains - 1) in
@@ -120,12 +130,18 @@ let kernel1 ijw m =
   let stop = Sys.time () in
   let _  =Printf.printf "Exec : %f" (stop -. start) in
   
-
-  let hashTable1 = Hashtbl.create (maximumEdgeLabel + 1) in
   (*let _ = Printf.printf "Three\n" in*)
-  let adjMatrix = adjustForAllVertices hashTable (maximumEdgeLabel + 1) 0 hashTable1 in
+  let _ = adjustForAllVertices hashTable (maximumEdgeLabel + 1) 0 in
   let _ = Printf.printf "%d" maximumEdgeLabel in
-  (adjMatrix, maximumEdgeLabel + 1)
+  (hashTable, maximumEdgeLabel + 1)
+
+let rec printx l = 
+  match l with
+  [] -> None |
+  head::tail -> 
+  let _ = Printf.printf "First : %d\n" (fst head) in
+  let _ = Printf.printf "First : %f\n" (snd head) in 
+  printx tail
 
 let linkKronecker () =
   let file = open_in "/home/shubh/graph500par/kronecker.txt" in
@@ -133,15 +149,11 @@ let linkKronecker () =
   let (adjMatrix,number) =
     kernel1 ijw (snd (computeNumber scale edgefactor))
   in
-  (*let _  =Printf.printf "\nLen : %d\n" (List.length (Hashtbl.find adjMatrix 4)) in
-  let x = List.nth (Hashtbl.find adjMatrix 4) 0 in
-
-  let _ = Printf.printf "First : %d\n" (fst x) in
-  let _ = Printf.printf "First : %f\n" (snd x) in
-  let x = List.nth (Hashtbl.find adjMatrix 4) 1 in
-  let _ = Printf.printf "Second : %d\n" (fst x) in
-  let _ = Printf.printf "Second : %f\n" (snd x) in
-  *)
+  (*match Lockfree.Hash.find adjMatrix 1 with 
+  None -> exit 0; |
+  Some l ->  
+  let _ = Printf.printf "\nLen : %d\n" (List.length l) in
+  let _ = printx l in*)
   adjMatrix,number
 ;;
 
