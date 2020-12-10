@@ -14,7 +14,7 @@ let rec printList lst =
 	[] -> None |
 	hd::tl -> Printf.printf "%d" (fst hd); printList tl
 
-let rec bfs adjMatrix level queue = 
+let rec bfs adjMatrix level queue pool = 
 	if Lockfree.MSQueue.is_empty queue = true then ()
 else
 	match Lockfree.MSQueue.pop queue with
@@ -23,7 +23,6 @@ else
 		match Lockfree.Hash.find adjMatrix root with
 			None -> () |
 			Some lst ->
-				let pool = T.setup_pool ~num_domains:(num_domains - 1) in
 				(*Printf.printf "Root : %d\n" root;
 				let _ = Array.iter (fun i -> Printf.printf "%d" i) level in
 				Printf.printf "\n"; 
@@ -39,8 +38,7 @@ else
 									Lockfree.MSQueue.push queue (fst (List.nth lst i))
 									end 
 				);
-				T.teardown_pool pool;
-				bfs adjMatrix level queue
+				bfs adjMatrix level queue pool
 
 let kernel2 () = 
   	let ans = Kernel1_par.linkKronecker () in
@@ -50,7 +48,9 @@ let kernel2 () =
   	level.(startVertex) <- 0;
 	let queue = Lockfree.MSQueue.create () in
 	let _ = Lockfree.MSQueue.push queue startVertex in
-	let _ = bfs adjMatrix level queue in
+	let pool = T.setup_pool ~num_domains:(num_domains - 1) in
+	let _ = bfs adjMatrix level queue pool in
+	T.teardown_pool pool;
 	let _ = Array.iter (fun i -> Printf.printf "%d" i) level in 
 	level
 
