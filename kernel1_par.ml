@@ -16,25 +16,21 @@ module T = Domainslib.Task
 (*This basically sorts the list in a way that (startVertex, endVertex), 
 startVertex > endVertex.
 It removes the self loops from ijw*)
-let sortVerticeList ar newAr index =
-  let rec sortVerticeList ar maximum newAr index =
-    if index = -1 then (newAr, int_of_float maximum)
+let sortVerticeList ar index =
+  let rec sortVerticeList ar maximum index =
+    if index = -1 then (int_of_float maximum)
     else if ar.(0).(index) > ar.(1).(index) then
       sortVerticeList ar
-        (max maximum ar.(0).(index))
-        (Array.append newAr
-           [|[| ar.(0).(index); ar.(1).(index); ar.(2).(index) |]|])
-        (index - 1)
-    else if ar.(0).(index) = ar.(1).(index) then
-      sortVerticeList ar (max maximum ar.(0).(index)) newAr (index - 1)
+        (max maximum ar.(0).(index)) (index-1)
     else
+      let temp = ar.(0).(index) in
+      ar.(0).(index) <- ar.(1).(index);
+      ar.(1).(index) <- temp;
       sortVerticeList ar
-        (max maximum ar.(1).(index))
-        (Array.append newAr
-           [|[| ar.(1).(index); ar.(0).(index); ar.(2).(index) |]|])
+        (max maximum ar.(0).(index))
         (index - 1)
   in
-  sortVerticeList ar 0. newAr index
+  sortVerticeList ar 0. index
 
 (*This is basically the construction of adj matrix [row][col], 
 just in case dense graphs are being tested. All the kernels further though 
@@ -53,19 +49,23 @@ is between index and the list (endVertex, weight) *)
 let addEdge startVertex endVertex weight hashTable =
     match Lockfree.Hash.find hashTable startVertex with 
     None ->  Lockfree.Hash.add hashTable startVertex [(endVertex, weight)] |
-    Some l -> Lockfree.Hash.add hashTable startVertex ((endVertex, weight) :: l)
+    Some l -> (*List.iter (fun (x,y) -> Printf.printf "%d,%f " x y) l;*)
+              (*Printf.printf "[ENDVERTEX, WGHT]\n %d,%d,%f \n"  startVertex endVertex weight;*)
+              Lockfree.Hash.add hashTable startVertex ((endVertex, weight) :: l)
 
 (*The two functions constructionAdjHash and kernel1 are the main 
 functions driving all the other functions.*)
-let rec constructionAdjHash ar hashTable i lower index =
-  if index = lower-1 then ()
+let rec constructionAdjHash ar hashTable i index higher =
+  if index = higher + 1 then ()
+else
+    let startVertex = int_of_float ar.(0).(index)
+    and endVertex = int_of_float ar.(1).(index)
+    and weight = ar.(2).(index) in
+    if startVertex = endVertex then constructionAdjHash ar hashTable i (index+1) higher
   else
-    let startVertex = int_of_float ar.(index).(0)
-    and endVertex = int_of_float ar.(index).(1)
-    and weight = ar.(index).(2) in
-    addEdge startVertex endVertex weight hashTable;
-    addEdge endVertex startVertex weight hashTable;
-    constructionAdjHash ar hashTable i lower (index - 1)
+    let _ = addEdge startVertex endVertex weight hashTable in
+    let _ = addEdge endVertex startVertex weight hashTable in
+    constructionAdjHash ar hashTable i (index + 1) higher
 
 (*let rec find_all adjMatrix index hashTable = 
   if Lockfree.Hash.mem adjMatrix index = false then Lockfree.Hash.find hashTable index
@@ -107,31 +107,31 @@ let computeNumber scale edgefactor =
   let m = edgefactor * n in
   (n, m)
 
-let kernel1 ijw m =
-  (*let start = Sys.time () in*) 
-  let ar, maximumEdgeLabel = sortVerticeList ijw [||] (m - 1) in
-  (*let stop = Sys.time () in
-  let _  =Printf.printf "Sort Exec : %f\n" (stop -. start) in
-  let _ = Printf.printf "Length : %d, One\n" (Array.length ar) in*)
-  
+let printArray ijw = 
+  Array.iter (fun x -> Printf.printf "%f" x) ijw.(0);
+  Printf.printf "\n";
+   Array.iter (fun x -> Printf.printf "%f" x) ijw.(1)
+
+let kernel1 ijw m pool =
+  let s = Unix.gettimeofday () in
+  let maximumEdgeLabel = sortVerticeList ijw (m - 1) in
   let hashTable = Lockfree.Hash.create () in
-  let temp = (Array.length ar)/num_domains in
-  let start = Sys.time () in
-  (*let _ = Printf.printf "Length num_of : %d\n" (num_domains) in*)
-  
-  let pool = T.setup_pool ~num_domains:(num_domains - 1) in
+  let temp = (Array.length (ijw.(0)) )/num_domains in
+  let start = Unix.gettimeofday  () in
   T.parallel_for pool ~start:0 ~finish:(num_domains-1)
     ~body:(fun i -> if i=(num_domains-1) then 
-      constructionAdjHash ar hashTable i (i*temp) (Array.length ar-1)
-    else constructionAdjHash ar hashTable i (i*temp) (i*temp + temp-1));
-  (*let _ = Printf.printf "Two\n" in*)
-  let _ = T.teardown_pool pool in 
+     constructionAdjHash ijw hashTable i (i*temp) ( (Array.length ijw.(0)) - 1)
+    else constructionAdjHash ijw hashTable i (i*temp) (i*temp + temp-1));
+  let _ = T.teardown_pool pool in
+  (*let _ = Printf.printf "Two\n" in*) 
   
-  let stop = Sys.time () in
-  let _  =Printf.printf "Exec : %f" (stop -. start) in
-  
+  let stop = Unix.gettimeofday () in
+  let _  =Printf.printf "POOL Exec : %f\n" (stop -. start) in
+  let _  =Printf.printf "SORT + POOL Exec : %f\n" (stop -. s) in
   (*let _ = Printf.printf "Three\n" in*)
   let _ = adjustForAllVertices hashTable (maximumEdgeLabel + 1) 0 in
+  let t = Unix.gettimeofday () in
+  let _  =Printf.printf "ADJUST FOR ALL Exec : %f\n" (  t -. stop) in
   let _ = Printf.printf "%d" maximumEdgeLabel in
   (hashTable, maximumEdgeLabel + 1)
 
@@ -143,13 +143,30 @@ let rec printx l =
   let _ = Printf.printf "First : %f\n" (snd head) in 
   printx tail
 
+let rec printList lst = 
+  match lst with
+  [] -> None |
+  hd::tl -> let _ = List.iter (fun (x,_) -> Printf.printf "%d" x) (hd) in
+            let _ = Printf.printf "\n" in
+            printList tl
+
 let linkKronecker () =
-  let file = open_in "/home/shubh/graph500par/kronecker.txt" in
+  let s = Unix.gettimeofday () in
+  let file = open_in "/home/shubh/graph500par/kronecker1210.txt" in
   let ijw = readFile file [||] in
+  let r = Unix.gettimeofday () in
+  let pool = T.setup_pool ~num_domains:(num_domains - 1) in
   let (adjMatrix,number) =
-    kernel1 ijw (snd (computeNumber scale edgefactor))
+    kernel1 ijw (snd (computeNumber scale edgefactor)) pool
   in
-  (*match Lockfree.Hash.find adjMatrix 1 with 
+  let t = Unix.gettimeofday () in
+  Printf.printf "\nKERNEL1 BEFORE ADJMATRIX: %f\n" (r -. s);
+  Printf.printf "\nKERNEL1 : %f\n" (t -. s);
+  Printf.printf "\nADJMATRIX: %f\n" (t -. r);
+  Printf.printf "KERNEL1 END--->\n\n";
+  (*let lst = Lockfree.Hash.elem_of adjMatrix in
+  let _ = printList lst in*)
+  (*match Lockfree.Hash.find adjMatrix 7 with 
   None -> exit 0; |
   Some l ->  
   let _ = Printf.printf "\nLen : %d\n" (List.length l) in
