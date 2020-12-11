@@ -45,7 +45,7 @@ let kernel2 () =
   	let ans = Kernel1_par.linkKronecker () in
   	let adjMatrix = fst ans in
   	let n = snd ans in
-  	let s = Unix.gettimeofday () in
+  	(*let s = Unix.gettimeofday () in*)
   	let level = Array.make n (-1) in
   	level.(startVertex) <- 0;
 	let queue = Lockfree.MSQueue.create () in
@@ -55,9 +55,9 @@ let kernel2 () =
 	let _ = bfs adjMatrix level queue pool in
 	let r = Unix.gettimeofday () in
 	Printf.printf "\nBFS: %f\n" (r -. t);
-	Printf.printf "\nKERNEL2 TOTAL: %f\n" (r -. s);
+	(*Printf.printf "\nKERNEL2 TOTAL: %f\n" (r -. s);*)
 	T.teardown_pool pool;
-	let _ = Array.iter (fun i -> Printf.printf "%d" i) level in
+	(*let _ = Array.iter (fun i -> Printf.printf "%d" i) level in*)
 	level
 
 let _ = kernel2 ()

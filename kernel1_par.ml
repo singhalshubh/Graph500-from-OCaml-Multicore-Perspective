@@ -110,14 +110,14 @@ let computeNumber scale edgefactor =
 let printArray ijw = 
   Array.iter (fun x -> Printf.printf "%f" x) ijw.(0);
   Printf.printf "\n";
-   Array.iter (fun x -> Printf.printf "%f" x) ijw.(1)
+  Array.iter (fun x -> Printf.printf "%f" x) ijw.(1)
 
 let kernel1 ijw m pool =
-  let s = Unix.gettimeofday () in
+  (*let s = Unix.gettimeofday () in*) 
   let maximumEdgeLabel = sortVerticeList ijw (m - 1) in
   let hashTable = Lockfree.Hash.create () in
   let temp = (Array.length (ijw.(0)) )/num_domains in
-  let start = Unix.gettimeofday  () in
+  (*let start = Unix.gettimeofday  () in*)
   T.parallel_for pool ~start:0 ~finish:(num_domains-1)
     ~body:(fun i -> if i=(num_domains-1) then 
      constructionAdjHash ijw hashTable i (i*temp) ( (Array.length ijw.(0)) - 1)
@@ -125,14 +125,14 @@ let kernel1 ijw m pool =
   let _ = T.teardown_pool pool in
   (*let _ = Printf.printf "Two\n" in*) 
   
-  let stop = Unix.gettimeofday () in
+  (*let stop = Unix.gettimeofday () in
   let _  =Printf.printf "POOL Exec : %f\n" (stop -. start) in
   let _  =Printf.printf "SORT + POOL Exec : %f\n" (stop -. s) in
-  (*let _ = Printf.printf "Three\n" in*)
+  let _ = Printf.printf "Three\n" in*)
   let _ = adjustForAllVertices hashTable (maximumEdgeLabel + 1) 0 in
-  let t = Unix.gettimeofday () in
+  (*let t = Unix.gettimeofday () in
   let _  =Printf.printf "ADJUST FOR ALL Exec : %f\n" (  t -. stop) in
-  let _ = Printf.printf "%d" maximumEdgeLabel in
+  let _ = Printf.printf "%d" maximumEdgeLabel in*)
   (hashTable, maximumEdgeLabel + 1)
 
 let rec printx l = 
@@ -151,19 +151,19 @@ let rec printList lst =
             printList tl
 
 let linkKronecker () =
-  let s = Unix.gettimeofday () in
-  let file = open_in "/home/shubh/graph500par/kronecker1210.txt" in
+  (*let s = Unix.gettimeofday () in*)
+  let file = open_in "kronecker1230.txt" in
   let ijw = readFile file [||] in
-  let r = Unix.gettimeofday () in
+  (*let r = Unix.gettimeofday () in*)
   let pool = T.setup_pool ~num_domains:(num_domains - 1) in
   let (adjMatrix,number) =
     kernel1 ijw (snd (computeNumber scale edgefactor)) pool
   in
-  let t = Unix.gettimeofday () in
+  (*let t = Unix.gettimeofday () in
   Printf.printf "\nKERNEL1 BEFORE ADJMATRIX: %f\n" (r -. s);
   Printf.printf "\nKERNEL1 : %f\n" (t -. s);
   Printf.printf "\nADJMATRIX: %f\n" (t -. r);
-  Printf.printf "KERNEL1 END--->\n\n";
+  Printf.printf "KERNEL1 END--->\n\n";*)
   (*let lst = Lockfree.Hash.elem_of adjMatrix in
   let _ = printList lst in*)
   (*match Lockfree.Hash.find adjMatrix 7 with 
@@ -172,6 +172,3 @@ let linkKronecker () =
   let _ = Printf.printf "\nLen : %d\n" (List.length l) in
   let _ = printx l in*)
   adjMatrix,number
-;;
-
-linkKronecker ();;
