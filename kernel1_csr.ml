@@ -50,7 +50,7 @@ let rec readFile file ijw =
 let computeNumber scale edgefactor =
   let n = int_of_float (2. ** float_of_int scale) in
   let m = edgefactor * n in
-  (n, m)
+  (n, (2*m))
 
 let rec adjust row index value = 
   if row.(index) = value then ()
