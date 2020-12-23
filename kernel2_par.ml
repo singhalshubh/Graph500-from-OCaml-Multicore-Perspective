@@ -15,48 +15,49 @@ module T = Domainslib.Task
 *)
 
 let rec findlst lst col row root index = 
-	if index = (row.(root+1)+1) then lst 
+	if index = (row.(root+1)+1) then () 
 else
 	if col.(index) = root then 
 	findlst lst col row root (index+1) else
-	findlst (col.(index)::lst) col row root (index+1)
+	begin Lockfree.List.push lst col.(index);
+	findlst lst col row root (index+1) end
 
-let rec bfs col row level queue pool = 
-	if Lockfree.MSQueue.is_empty queue = true then ()
+let rec bfs col row level queue pool l = 
+	if Lockfree.List.is_empty queue = true then ()
 else
-	match Lockfree.MSQueue.pop queue with
-	None -> () |
-	Some root -> 
-		let lst = findlst [] col row root (row.(root)) in 
-		Printf.printf "Root : %d\n" root;
-		let _ = Array.iter (fun i -> Printf.printf "%d" i) level in
-		Printf.printf "\n"; 
-		let _ = List.iter (fun i -> Printf.printf "%d" i) lst in
-		Printf.printf "\n";
-
-		T.parallel_for pool ~start:0 ~finish:(List.length lst - 1) 
-		~body:(	fun i -> 
+	(*THis is basically accumulating all neighbours of all nodes in the queue*)
+	let adjlistlevel = Array.of_list (Lockfree.List.elem_of queue) in
+	let queue1 = Lockfree.List.create () in
+	let x = Lockfree.List.create () in 
+	T.parallel_for pool ~start:0 ~finish:(Array.length adjlistlevel - 1)
+	~body:( fun i -> 
+			findlst x col row adjlistlevel.(i) (row.(adjlistlevel.(i) ) ) 
+		);
+	let x = Lockfree.List.elem_of x in
+	T.parallel_for pool ~start:0 ~finish:(List.length x - 1) 
+	~body:(	fun i -> 
 				(*Printf.printf "INdex : %d " i;*)
-				if level.(List.nth lst i) != (-1) then ()
+				if level.(List.nth x i) != (-1) then ()
 						 else begin 
 							(*Printf.printf "efjewfjef\n";*)
-							level.(List.nth lst i) <- level.(root) + 1;
+							level.(List.nth x i) <- l + 1;
 							(*Printf.printf "jk";*)
-							Lockfree.MSQueue.push queue (List.nth lst i)
+							Lockfree.List.push queue1 (List.nth x i)
 							end 
 		);
-		bfs col row level queue pool
+		bfs col row level queue1 pool (l+1)
 
 let kernel2 () = 
   	let (_, col, row, n) = Kernel1_csr.linkKronecker () in
   	let s = Unix.gettimeofday () in
+  	Printf.printf "Kernel3";
   	let level = Array.make n (-1) in
   	level.(startVertex) <- 0;
-	let queue = Lockfree.MSQueue.create () in
-	let _ = Lockfree.MSQueue.push queue startVertex in
+	let queue = Lockfree.List.create () in
+	let _ = Lockfree.List.push queue startVertex in
 	let pool = T.setup_pool ~num_domains:(num_domains - 1) in
 	let t = Unix.gettimeofday () in
-	let _ = bfs col row level queue pool in
+	let _ = bfs col row level queue pool 0 in
 	let r = Unix.gettimeofday () in
 	Printf.printf "\nBFS: %f\n" (r -. t);
 	Printf.printf "\nKERNEL2 TOTAL: %f\n" (r -. s);
