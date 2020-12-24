@@ -81,4 +81,10 @@ Refer to https://graph500.org/?page_id=12 for more details.
   For detailed analysis of results and performance metrics, and future work for kernel1 (selection of apt format) and kernel3_par (delta stepping algorithm), please refer to the documentation. Feel free to reach out to me at mailto:shubhpal@seas.upenn.edu.
   
   #### Future Work
-  Construction of Kernel3_par (using delta stepping/radius stepping) and optimizations for parallel version of kernel1.
+  Construction of Kernel3_par (using delta stepping/radius stepping) and optimizations for parallel version of kernel1. <br><br>
+  
+  Apart from the graph500 work, I addressed the issue on https://github.com/ocaml-bench/sandmark/ **[RFC] Classifying benchmarks based on running time #179**, mentioned in folder Git Issues.<br>
+  If you want to follow my production process of graph500seq and my start in OCaml, refer https://github.com/ocaml-bench/sandmark/commits?author=singhalshubh <br>
+  For graph500par, refer to commits in https://github.com/singhalshubh/Graph500-from-OCaml-Multicore-Perspective/commits/graph500par
+  
+  
