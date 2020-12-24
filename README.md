@@ -78,7 +78,7 @@ Refer to https://graph500.org/?page_id=12 for more details.
   2. For **Kernel3** : <br>
   ![SSSP Speedup](https://github.com/singhalshubh/Graph500-from-OCaml-Multicore-Perspective/blob/master/graph500par/Kernel3(SSSP)%20-%20Speedup%20(y-axis)%20vs%20no%20of%20cores%20(x-axis).png)
   
-  For detailed analysis of results and performance metrics, and future work for kernel1 (selection of apt format) and kernel3_par (delta stepping algorithm), please refer to the documentation. Feel free to reach out to me at mailto:shubhpal@seas.upenn.edu.
+  For detailed analysis of results and performance metrics, and future work for kernel1 (selection of apt format) and kernel3_par (delta stepping algorithm), please refer to the documentation. Feel free to reach out to me at shubhpal@seas.upenn.edu.
   
   #### Future Work
   Construction of Kernel3_par (using delta stepping/radius stepping) and optimizations for parallel version of kernel1. <br><br>
