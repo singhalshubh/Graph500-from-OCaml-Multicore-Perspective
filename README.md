@@ -35,7 +35,7 @@ Refer to https://graph500.org/?page_id=12 for more details.
       ./<executable> <params>
       
       ```
-  Make sure that you always generate kronecker.txt first and then run all the kernels. Run CSR_Sequential format in the next step as it requires format of Kronecker generation.<br>
+  Make sure that you always generate kronecker.txt first and then run all the kernels from the same directory. Run CSR_Sequential format in the next step as it requires format of Kronecker generation.<br>
   3. **For Parallel**
    - Look for graph500par on master branch and clone it to a local machine.
    - Kronecker.ml produces the graph in <startVertex, endVertex, weight> tuples in columns, and stores it in the file named "kronecker32.txt"
