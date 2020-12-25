@@ -110,7 +110,7 @@ let kernel1 ijw m n pool =
 
 let linkKronecker () =
   (*let s = Unix.gettimeofday () in *)
-  let file = open_in "/home/shubh/graph500par/kronecker32.txt" in
+  let file = open_in "kronecker32.txt" in
   let ijw = readFile file [||] in
   let (n,m) = computeNumber scale edgefactor in
   (*Array.iter (fun i -> Printf.printf "%f " i) (ijw.(0));
@@ -131,6 +131,3 @@ let linkKronecker () =
   Array.iter (fun i -> Printf.printf "%d " i) (row);
    Printf.printf "\n";
   value, col, row, number
-;;
-
-let _ = linkKronecker();;
