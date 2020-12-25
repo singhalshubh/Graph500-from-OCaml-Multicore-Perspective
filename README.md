@@ -85,6 +85,7 @@ Refer to https://graph500.org/?page_id=12 for more details.
   
   Apart from the graph500 work, I addressed the issue on https://github.com/ocaml-bench/sandmark/ **[RFC] Classifying benchmarks based on running time #179**, mentioned in folder Git Issues.<br>
   If you want to follow my production process of graph500seq and my start in OCaml, refer https://github.com/ocaml-bench/sandmark/commits?author=singhalshubh <br>
-  For graph500par, refer to commits in https://github.com/singhalshubh/Graph500-from-OCaml-Multicore-Perspective/commits/graph500par
+  For graph500par, refer to commits in https://github.com/singhalshubh/Graph500-from-OCaml-Multicore-Perspective/commits/graph500par <br>
+  For those who are starting in OCaml, refer to the documentation and https://github.com/singhalshubh/Graph500-from-OCaml-Multicore-Perspective/tree/Documentation-StartingOCaml
   
   
