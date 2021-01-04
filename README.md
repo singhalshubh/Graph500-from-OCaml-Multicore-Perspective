@@ -2,6 +2,9 @@
 
 #### This project has been done in collaboration with OCaml Labs, UK and Dr. KC Sivaramakrishnan at Indian Institute of Technology, Madras in the capacity of Research SDE. 
 
+### Detailed documentation
+https://arxiv.org/abs/2012.13548
+
 ### Overview 
 OCaml  is  a  industry  adapted  language  focused  on solving  numerical  and  scientific  computing  problems and one such use case was developing supe intensive graph  problems. We try to implement Graph  Construction, BFS, Shortest-Path  problems  using  the desired  specifications  and  rules  posed  by  graph500. This  project  aims  at  providing  a  clear  direction  of choices  of  several  data  structures  used,  algorithms developed  and  pose  a  reason  behind  every  step  of program.  
 <br>
